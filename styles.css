@@ -6,10 +6,15 @@ body {
   padding: 0;
 }
 
-#work-space {
+.work-space {
   height: 100%;
+  width: 100%;
   overflow: scroll;
   cursor: grab;
+}
+
+.space-stop {
+  touch-action: none;
 }
 
 ::-webkit-scrollbar {
@@ -34,7 +39,7 @@ body {
   background-repeat: repeat;
 }
 
-#left-menu {
+.left-menu {
   padding: 10px;
   transition: 0.6s;
   position: fixed;
@@ -45,11 +50,39 @@ body {
   cursor: pointer;
   backdrop-filter: blur(2px);
   background-color: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
 }
 
-#left-menu:hover {
-  top: 0px;
-  left: 0px;
-  bottom: 0px;
-  width: calc(100vw - 62%);
+.left-menu > * {
+  opacity: 0;
+}
+
+.left-menu-open {
+  backdrop-filter: blur(4px);
+  width: 150px;
+}
+
+.left-menu-open > * {
+  opacity: 1;
+}
+
+.block {
+  width: 100px;
+  height: 100px;
+}
+
+.sample-block {
+  background-color: aquamarine;
+}
+
+.draggable {
+  position: absolute;
+  background-color: rgb(255, 161, 37);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.main-block {
+  position: relative;
+  background-color: rgb(67, 184, 0);
 }
