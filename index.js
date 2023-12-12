@@ -1,70 +1,34 @@
 "use strict";
+// index.js
+// Цей файл є основним входом у JavaScript Code Visualizer.
+// Він координує процес перетворення вхідного коду JavaScript в візуалізоване HTML-представлення.
+import { inputCode } from "./src/utils/input_code.js";
+import { codeStructureInfo } from "./src/utils/StructureTagsManager.js";
+import { traverseAST, visitor } from "./src/ast/AstTraverser.js";
+import { generateAST } from "./src/ast/AstGenerator.js";
+import { createStructureTags } from "./src/ui/CodeVisualizer.js";
+import { setInputContent, setOutputHtml } from "./src/ui/DomHandler.js";
 
-const workSpace = document.getElementById("work-space");
-const leftMenu = document.getElementById("left-menu");
-const mainContent = document.getElementById("main-content");
-workSpace.scrollTo(1100, 1400);
-workSpace.classList.remove("space-stop");
-let isTouchStart = false;
-let isDragMove = false;
-let xOffset = 0;
-let yOffset = 0;
-let countOfBlock = -1;
-let draggableElement = false;
+// Генерує HTML-представлення вхідного коду.
+// Отримує AST від вхідного коду, обходить його та створює відповідне HTML-представлення.
+function generateHtml() {
+  try {
+    const { ast } = generateAST(inputCode);
+    // console.log("<| ast |>\n", ast);
+    traverseAST(ast.program.body, visitor);
 
-const handlePointerDown = (e) => {
-  workSpace.classList.toggle("space-stop", e.target.id === "left-menu");
-  if (e.target.classList.contains("sample-block")) {
-    e.preventDefault();
-    xOffset = e.offsetX;
-    yOffset = e.offsetY;
-    document.addEventListener("pointermove", handlePointerMove);
-    isTouchStart = true;
+    createStructureTags();
+    // console.log("<| codeLines |>\n", codeStructureInfo.codeLines);
+    setInputContent(inputCode);
+    setOutputHtml(codeStructureInfo.codeLines.join(""));
+
+    console.log(
+      "_codeStructureInfo _\n_ before TRAVERSE _\n",
+      codeStructureInfo
+    );
+  } catch (error) {
+    // console.error("Error generating HTML:", error);
   }
-  leftMenu.classList.toggle("left-menu-open", e.target.id === "left-menu");
-  console.log("DOWN", e.target);
-};
+}
 
-const handlePointerMove = (e) => {
-  if (isTouchStart) {
-    if (isDragMove) {
-      draggableElement.style.left = `${Math.round(e.clientX)}px`;
-      draggableElement.style.top = `${Math.round(e.clientY)}px`;
-    } else {
-      if (e.offsetX !== xOffset) {
-        countOfBlock++;
-        draggableElement = e.target.cloneNode(true);
-        e.target.releasePointerCapture(e.pointerId);
-        draggableElement.classList.remove("sample-block");
-        draggableElement.classList.add("draggable");
-        document.body.append(draggableElement);
-        isDragMove = true;
-        console.log("MOVE");
-      }
-    }
-  }
-};
-
-const handlePointerUp = (e) => {
-  if (draggableElement) {
-    e.preventDefault();
-    draggableElement.classList.add("main-block");
-    draggableElement.classList.remove("draggable");
-    mainContent.append(draggableElement);
-    draggableElement.style.left = `${Math.round(e.offsetX)}px`;
-    draggableElement.style.top = `${Math.round(
-      e.offsetY - countOfBlock * 100
-    )}px`;
-    document.removeEventListener("pointermove", handlePointerMove);
-    draggableElement = false;
-  }
-  isTouchStart = false;
-  isDragMove = false;
-  xOffset = 0;
-  yOffset = 0;
-  console.log("UP");
-};
-
-document.addEventListener("pointerdown", handlePointerDown);
-document.addEventListener("pointermove", handlePointerMove);
-document.addEventListener("pointerup", handlePointerUp);
+generateHtml(); // Виклик функції для ініціації процесу візуалізації.
